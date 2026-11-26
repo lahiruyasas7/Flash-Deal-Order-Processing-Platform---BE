@@ -150,6 +150,12 @@ payment data.
     endpoints.
 -   Use strict CORS configuration.
 -   Avoid exposing internal service ports publicly.
+-   Swagger/OpenAPI documentation is enabled for local development and
+    staging only by an explicit environment configuration.
+-   Swagger UI and its generated specification must be access-controlled
+    or disabled outside an approved public API environment.
+-   Swagger must not expose refresh credentials, secrets, provider payload
+    details, password hashes, or internal implementation schemas.
 
 ## 8. Deployment evolution
 

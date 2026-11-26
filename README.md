@@ -77,6 +77,7 @@ documentation. The specifications do not invent provider behavior.
 -   Local infrastructure: Docker Compose
 -   Testing: Jest + Supertest
 -   Initial deployment: local development first; cloud deployment later
+-   API documentation: NestJS Swagger/OpenAPI
 
 ## Architecture principle
 

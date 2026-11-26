@@ -38,6 +38,44 @@ envelopes before implementation. All public routes are versioned under
 -   Never expose internal stack traces or secrets.
 -   Customer resource access must enforce ownership on the server.
 
+## 1A. Swagger and OpenAPI
+
+The NestJS API Gateway or public API application exposes generated
+OpenAPI documentation using Swagger tooling.
+
+- The OpenAPI specification is generated from DTOs, controllers,
+  decorators, and shared response types.
+- The Swagger UI route is proposed as `/docs`; the route must not expose
+  internal service ports or provider secrets.
+- The generated JSON route is `/docs-json` unless a deployment standard
+  is adopted.
+- Swagger/OpenAPI is enabled in local development and may be enabled in
+  staging behind authentication. It is disabled or access-restricted in
+  production unless there is an approved public-api requirement.
+- Markdown documents remain the source of truth for business rules,
+  lifecycle transitions, and deferred provider behavior. Swagger is the
+  machine-readable interface contract and must not replace those rules.
+- The generated contract is reviewed for accidental exposure of
+  password hashes, refresh credentials, PayHere secrets, provider payload
+  secrets, or internal identifiers.
+
+Swagger schemas must cover:
+
+- request and response DTOs;
+- authentication and authorization requirements;
+- the `Authorization: Bearer <access-token>` scheme;
+- the `Idempotency-Key` header for order creation;
+- refresh credentials as an `HttpOnly` cookie rather than a JavaScript
+  readable token field;
+- pagination and stable list/error envelopes;
+- relevant success, validation, conflict, ownership, and not-found
+  responses;
+- deprecation or deferred status for provider-specific callback fields.
+
+PayHere callback fields must not be published as finalized Swagger
+schemas until verified against the current official provider
+documentation.
+
 ## 2. Authentication
 
   Method   Route              Access               Purpose

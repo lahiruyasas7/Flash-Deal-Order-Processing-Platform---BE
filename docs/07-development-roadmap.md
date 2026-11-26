@@ -46,6 +46,9 @@ checks using documented commands.
 -   Implement revocation of one session, family, or all user sessions.
 -   Implement gateway routing and role checks.
 -   Add authorization/ownership tests.
+-   Add Swagger/OpenAPI setup with environment-controlled UI exposure.
+-   Document authentication, DTO request/response schemas, pagination,
+    stable errors, and the `Idempotency-Key` header when routes are added.
 
 Exit criteria: protected routes and role restrictions work.
 

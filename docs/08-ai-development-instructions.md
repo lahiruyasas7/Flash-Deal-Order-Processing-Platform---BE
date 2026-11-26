@@ -83,6 +83,10 @@ Do not claim a command passed unless it was actually executed.
 -   Derive customer identity from the authenticated principal.
 -   Enforce ownership on every customer-specific resource.
 -   Document endpoints in Swagger/OpenAPI.
+-   Keep Swagger schemas synchronized with DTOs and public API
+    contracts.
+-   Do not expose secrets or provider payload details through Swagger.
+-   Do not publish unverified PayHere fields in Swagger/OpenAPI.
 
 ## 7. Messaging rules
 
