@@ -27,12 +27,21 @@ Exit criteria: requirements and architecture are approved.
 
 ## Phase 1 --- Repository and local infrastructure
 
--   Create monorepo or clearly organized multi-repository structure
-    (choose one and document why).
+-   Use npm workspaces for the backend API Gateway, Order Service, and
+    Notification Service in this backend repository. Keep the Next.js
+    frontend in its separate repository.
 -   Add Docker Compose for PostgreSQL, RabbitMQ, and Redis.
+-   Create separate local PostgreSQL databases for Order Service and
+    Notification Service; services must not access each other's
+    databases.
 -   Add environment variable examples without real secrets.
--   Add linting, formatting, TypeScript configuration, and CI baseline.
--   Add health checks and structured logging.
+-   Pin the supported Node.js major, and add linting, formatting, strict
+    TypeScript configuration, tests, and CI baseline.
+-   Add minimal NestJS app bootstraps with liveness/readiness endpoints
+    and structured JSON logging; do not add business features in this
+    phase.
+-   Add container health checks and document local startup, checks, and
+    shutdown commands.
 
 Exit criteria: a developer can start dependencies and run service health
 checks using documented commands.
