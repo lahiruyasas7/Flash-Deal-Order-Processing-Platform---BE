@@ -13,6 +13,12 @@ system in one prompt.
 -   Confirm order/payment/reservation state machines.
 -   Confirm PayHere integration mode and callback verification
     requirements.
+-   Confirmed MVP decisions are recorded: 15-minute reservation TTL,
+    one-deal-line orders, 2-unit per-customer/deal limit, provisioned
+    admins, manual late-payment reconciliation, and rotating refresh
+    sessions.
+-   Defer application implementation until official PayHere checkout and
+    callback details are reviewed.
 -   Confirm API and event naming.
 -   Record decisions in an Architecture Decision Record (ADR) when a
     meaningful trade-off is made.
@@ -36,6 +42,8 @@ checks using documented commands.
 -   Implement customer registration/login.
 -   Provision admin user securely.
 -   Implement JWT and refresh-session policy.
+-   Add hashed, rotating refresh credentials and reuse detection.
+-   Implement revocation of one session, family, or all user sessions.
 -   Implement gateway routing and role checks.
 -   Add authorization/ownership tests.
 
@@ -46,6 +54,8 @@ Exit criteria: protected routes and role restrictions work.
 -   Implement deal schema and migrations.
 -   Implement admin deal CRUD/lifecycle.
 -   Implement public active-deal listing/details.
+-   Implement and test confirmed lifecycle transitions and immutable
+    post-activation price/stock fields.
 -   Add DTO validation and pagination.
 
 Exit criteria: admin can manage deals and customers can browse eligible
@@ -56,6 +66,8 @@ deals.
 -   Implement atomic stock reservation.
 -   Create order and immutable item snapshots transactionally.
 -   Add idempotency key handling.
+-   Enforce the 2-unit paid-plus-active-reservation limit in PostgreSQL
+    transactions; do not use Redis for this decision.
 -   Implement order listing/details and ownership checks.
 -   Add concurrency tests.
 
@@ -67,6 +79,7 @@ requests.
 -   Implement expiry worker.
 -   Make worker safe under multiple instances.
 -   Test duplicate execution and payment/expiry race.
+-   Implement conditional customer/admin cancellation.
 
 Exit criteria: reservations release once and counters remain consistent.
 
@@ -80,6 +93,9 @@ Exit criteria: reservations release once and counters remain consistent.
 -   Implement provider notification idempotency.
 -   Implement payment/order state transitions and late-payment
     reconciliation.
+-   Add the reconciliation record and admin resolution workflow.
+-   Do not implement invented callback fields or a provider assumption;
+    official PayHere documentation is an implementation dependency.
 -   Test invalid, duplicate, delayed, and mismatched callbacks.
 
 Exit criteria: sandbox payment success/failure changes state correctly
@@ -90,6 +106,9 @@ and safely.
 -   Add outbox publisher.
 -   Configure RabbitMQ exchange, queues, retries, and DLQ.
 -   Implement notification consumer and idempotency.
+-   Persist event/notification processing before acknowledgment.
+-   Configure bounded retries, durable retry/DLQ routing, and duplicate
+    delivery tests.
 -   Add email templates and SMTP sandbox.
 -   Test broker outage and duplicate event delivery.
 

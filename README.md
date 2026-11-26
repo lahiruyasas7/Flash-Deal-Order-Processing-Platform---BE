@@ -48,6 +48,23 @@ so far. Items marked **Proposed** are recommended defaults, not
 confirmed external requirements. Review and approve them before
 implementation.
 
+## Confirmed MVP decisions
+
+- Reservation expiry: 15 minutes.
+- Order shape: one deal line per order.
+- Per-customer limit: maximum 2 units per customer/deal pair. The count
+  includes paid purchases and active reservations and never double-counts
+  a paid reservation.
+- Administrator accounts: seeded/provisioned only.
+- Late verified payment after expiry: manual reconciliation/refund
+  review; no automatic oversell or re-reservation.
+- Authentication: short-lived access tokens with rotating refresh tokens
+  and revocable sessions.
+
+Provider-specific PayHere checkout and callback fields remain deferred
+until implementation is verified against the current official PayHere
+documentation. The specifications do not invent provider behavior.
+
 ## Core technical decisions
 
 -   Backend: NestJS + TypeScript

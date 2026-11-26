@@ -43,6 +43,13 @@ Do not invent requirements or silently change agreed architecture.
 -   Never mark an order paid from a frontend redirect.
 -   Verify PayHere notifications using current official documentation.
 -   Never invent PayHere fields, hashes, endpoints, or credentials.
+-   Do not implement PayHere checkout or callback assumptions before
+    confirming them against current official documentation.
+-   Enforce the confirmed 2-unit per-customer/deal limit in PostgreSQL
+    transactions; Redis is not part of purchase-limit correctness.
+-   Preserve lifecycle and reconciliation states defined in the
+    specifications instead of adding unreachable states or duplicate
+    workflows.
 
 ## 4. Workflow for each task
 

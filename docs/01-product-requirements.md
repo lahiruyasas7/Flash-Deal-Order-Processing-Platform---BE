@@ -40,8 +40,10 @@ unreliable distributed communication.
 -   JWT-based authentication.
 -   Role-based authorization (`ADMIN`, `CUSTOMER`).
 -   Passwords stored using a secure password hashing algorithm.
--   Refresh-token strategy and token revocation policy must be defined
-    during implementation.
+-   Access tokens are short-lived.
+-   Refresh tokens are rotating, revocable, and stored only as hashes.
+-   Refresh-session reuse is detected and revoked.
+-   Logout revokes the presented refresh session.
 
 ### Deal management
 
@@ -66,11 +68,14 @@ unreliable distributed communication.
 -   Inventory reservation must be atomic and concurrency-safe.
 -   Order creation and inventory reservation must be consistent.
 -   An order begins in `PENDING_PAYMENT`.
--   A reservation has an expiry time. **Proposed default: 15 minutes.**
+-   A reservation expires 15 minutes after order creation (confirmed
+    MVP default).
 -   A reservation can be released only once.
 -   A successful verified payment must not be lost merely because a
     timeout worker races with the payment notification; late-payment
     handling must be explicit.
+-   A customer is limited to 2 units across paid purchases and active
+    reservations for one deal.
 
 ### Payments
 
@@ -108,8 +113,10 @@ unreliable distributed communication.
     time.
 2.  A deal cannot accept new orders unless it is in a purchasable
     status.
-3.  Requested quantity must be a positive integer and must respect any
-    configured per-customer limit.
+3.  Requested quantity must be a positive integer. A customer may hold
+    at most 2 units across paid purchases and active reservations for
+    one deal. The check excludes expired, released, and cancelled
+    reservations and must not double-count a paid reservation.
 4.  Available stock must never become negative.
 5.  Total successful sales must never exceed the deal's total stock.
 6.  Order price is snapshotted when the order is created.
@@ -125,7 +132,7 @@ unreliable distributed communication.
 13. Service database ownership must be respected. No service directly
     reads or writes another service's tables.
 
-## 5. Proposed status models
+## 5. Confirmed status models
 
 ### Deal
 
@@ -135,17 +142,49 @@ unreliable distributed communication.
 -   `ENDED`
 -   `CANCELLED`
 
-Deal status may be derived from start/end time in some read paths, but
-persisted status transitions and scheduled activation/end jobs need one
-consistent policy. Decide this before implementation.
+Deal status is the lifecycle authority. Scheduled activation and ending
+are performed by a worker. Public deal listing uses only
+`status = ACTIVE` and a valid current time window.
+
+The confirmed lifecycle is:
+
+- `DRAFT` -> `SCHEDULED` or `ACTIVE`
+- `SCHEDULED` -> `ACTIVE` (scheduled worker or administrator early
+  activation) or `CANCELLED`
+- `ACTIVE` -> `ENDED` or `CANCELLED`
+- `ENDED` and `CANCELLED` are terminal
+
+Editing rules:
+
+- `DRAFT`: all deal fields may be edited.
+- `SCHEDULED`: all deal fields may be edited subject to validation.
+- `ACTIVE`: descriptive fields only; price and inventory fields are
+  immutable.
+- `ENDED`: business fields are immutable.
+- `CANCELLED`: business fields are immutable.
+
+Admins cannot create or update to a date range whose end is at or before
+its start.
 
 ### Order
 
 -   `PENDING_PAYMENT`
 -   `PAID`
--   `PAYMENT_FAILED`
+-   `RECONCILIATION_REQUIRED`
 -   `EXPIRED`
 -   `CANCELLED`
+
+`PAYMENT_FAILED` is not an order status. A provider failure applies only
+to the individual payment attempt and leaves the order
+`PENDING_PAYMENT` while the reservation remains active.
+
+`RECONCILIATION_REQUIRED` means a provider-verified success could not be
+settled against a valid active reservation. The reservation remains in
+its existing terminal state and no stock is restored or oversold.
+
+`CANCELLED` means the customer or an administrator cancelled before
+payment success and the active reservation was released. The same
+reservation cannot be released twice.
 
 ### Payment attempt
 
@@ -157,6 +196,9 @@ consistent policy. Decide this before implementation.
 
 An order may have multiple payment attempts, but at most one successful
 payment may settle the order.
+
+Payment attempt transitions are defined in the domain and workflow
+documents.
 
 ### Reservation
 
@@ -215,16 +257,27 @@ payment may settle the order.
 -   Failed messages are retried with bounded attempts and eventually
     routed to a dead-letter queue.
 
-## 8. Decisions to confirm before implementation
+## 8. Confirmed decisions and deferred decisions
 
--   Exact reservation TTL (15 minutes is proposed).
--   Whether one order may contain only one deal line (recommended for
-    MVP).
--   Per-customer purchase quantity limit.
--   Whether admins are seeded or can be registered through a protected
-    admin workflow (recommended: seeded/provisioned).
--   Exact JWT access/refresh token policy.
--   Exact PayHere checkout mode and required configuration.
--   Late successful payment after stock release: manual review/refund
-    path is recommended for MVP; do not automatically oversell.
--   Whether invoice PDF is in the first release or a later milestone.
+Confirmed MVP decisions:
+
+- Reservation TTL: 15 minutes.
+- Order shape: one deal line per order.
+- Per-customer limit: maximum 2 units for each customer/deal pair.
+  Count paid purchases and active reservations; do not double-count a
+  paid reservation.
+- Admin accounts: seeded/provisioned only; public admin registration is
+  out of scope.
+- Late verified success after reservation expiry: create a reconciliation
+  record for manual review/refund handling and never automatically
+  oversell.
+- Authentication: short-lived access tokens, rotating refresh tokens,
+  and revocable refresh sessions.
+
+Deferred implementation decisions:
+
+- Exact refresh access-token lifetime and refresh-token lifetime.
+- Exact PayHere checkout mode and all merchant/configuration fields.
+- The official callback verification method and stable notification key.
+- Whether PDF invoice generation is included in the first release or
+  added immediately after payment lifecycle hardening.
