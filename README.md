@@ -75,7 +75,8 @@ documentation. The specifications do not invent provider behavior.
 -   Payment: PayHere Sandbox
 -   Email testing: Mailtrap (or another SMTP sandbox)
 -   Local infrastructure: Docker Compose
--   Testing: Jest + Supertest
+-   Testing: Jest for unit tests; Supertest for API-level tests as public
+    routes are implemented
 -   Initial deployment: local development first; cloud deployment later
 -   API documentation: NestJS Swagger/OpenAPI
 
@@ -91,6 +92,39 @@ business data. The Order Service owns its PostgreSQL data. The
 Notification Service owns its notification data. A single local
 PostgreSQL server may host separate databases initially, but services
 must not query another service's tables directly.
+
+The backend services live in this npm-workspaces repository. The Next.js
+frontend is maintained in a separate repository.
+
+## Local development
+
+Requirements: Node.js 22.22.3 or later in the 22.x line (or 24.15.0 or
+later in the 24.x line), npm 10+, and Docker Compose v2.
+
+1. Copy `.env.example` to `.env`. These values are for local development
+   only; never use them in a shared or deployed environment.
+2. Install dependencies with `npm ci`.
+3. Start local dependencies with `docker compose up -d`.
+4. Run checks with `npm run verify`.
+5. Start an individual NestJS app. In PowerShell:
+
+   ```powershell
+   $env:PORT = "3000"; npm run start:dev --workspace @flash-deal/api-gateway
+   $env:PORT = "3001"; npm run start:dev --workspace @flash-deal/order-service
+   $env:PORT = "3002"; npm run start:dev --workspace @flash-deal/notification-service
+   ```
+
+   Run one service command per terminal.
+
+The apps expose `GET /health/live` and `GET /health/ready` on their
+configured port. At this foundation stage, readiness confirms the app
+process is running; dependency-specific readiness is added alongside
+database and broker integration. PostgreSQL, RabbitMQ, and Redis have
+their own Docker health checks. RabbitMQ's development management UI is
+available at `http://localhost:15672`.
+
+Stop local dependencies with `docker compose down`. To preserve local
+database state, do not remove the Compose volumes.
 
 ## Non-goals for the MVP
 
