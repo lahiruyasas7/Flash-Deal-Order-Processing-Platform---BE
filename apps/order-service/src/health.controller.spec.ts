@@ -1,7 +1,12 @@
+import { jest } from '@jest/globals';
+import { ServiceUnavailableException } from '@nestjs/common';
 import { HealthController } from './health.controller.js';
 
 describe('HealthController', () => {
-  const controller = new HealthController();
+  const prisma = {
+    checkDatabaseReadiness: jest.fn<() => Promise<void>>(),
+  };
+  const controller = new HealthController(prisma);
 
   it('reports liveness', () => {
     expect(controller.getLiveness()).toEqual({
@@ -10,11 +15,23 @@ describe('HealthController', () => {
     });
   });
 
-  it('reports process readiness', () => {
-    expect(controller.getReadiness()).toEqual({
+  it('reports readiness when the database is available', async () => {
+    prisma.checkDatabaseReadiness.mockResolvedValue(undefined);
+
+    await expect(controller.getReadiness()).resolves.toEqual({
       status: 'ready',
       service: 'order-service',
-      checks: { process: 'ok' },
+      checks: { process: 'ok', database: 'ok' },
     });
+  });
+
+  it('reports not ready when the database is unavailable', async () => {
+    prisma.checkDatabaseReadiness.mockRejectedValue(
+      new Error('database unavailable'),
+    );
+
+    await expect(controller.getReadiness()).rejects.toThrow(
+      ServiceUnavailableException,
+    );
   });
 });

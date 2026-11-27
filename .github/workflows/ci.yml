@@ -8,6 +8,9 @@ on:
 jobs:
   verify:
     runs-on: ubuntu-latest
+    # Prisma client generation requires a URL; CI does not connect to a database.
+    env:
+      ORDER_DATABASE_URL: postgresql://unused:unused@127.0.0.1:1/order_service
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
