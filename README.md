@@ -120,7 +120,19 @@ later in the 24.x line), npm 10+, and Docker Compose v2.
    builds, tests, typechecks, and starts in development. Database
    migrations are created only after schema models are added.
 
-6. Start an individual NestJS app. In PowerShell:
+6. After applying the Order Service migrations, provision the initial
+   administrator by setting `INITIAL_ADMIN_EMAIL` and
+   `INITIAL_ADMIN_PASSWORD` in your local `.env`. Use a password of
+   at least 15 characters; the seed hashes it with Argon2id and never
+   logs it. After provisioning, remove the password from `.env`. The
+   operation is idempotent: an existing administrator is left unchanged,
+   and an existing customer account is not promoted.
+
+   ```powershell
+   npm run prisma:seed --workspace @flash-deal/order-service
+   ```
+
+7. Start an individual NestJS app. In PowerShell:
 
    ```powershell
    $env:PORT = "3000"; npm run start:dev --workspace @flash-deal/api-gateway

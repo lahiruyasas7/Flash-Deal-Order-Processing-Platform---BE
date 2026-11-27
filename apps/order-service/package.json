@@ -9,12 +9,14 @@
     "prestart:dev": "npm run prisma:generate",
     "test": "node --experimental-vm-modules ../../node_modules/jest/bin/jest.js --runInBand",
     "pretest": "npm run prisma:generate",
-    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p tsconfig.seed.json",
     "pretypecheck": "npm run prisma:generate",
     "prisma:generate": "prisma generate",
     "prisma:migrate:dev": "prisma migrate dev",
     "prisma:migrate:deploy": "prisma migrate deploy",
-    "prisma:migrate:status": "prisma migrate status"
+    "prisma:migrate:status": "prisma migrate status",
+    "prisma:seed": "prisma db seed",
+    "preprisma:seed": "npm run prisma:generate"
   },
   "dependencies": {
     "@nestjs/common": "^12.0.0",
@@ -23,6 +25,7 @@
     "@nestjs/platform-express": "^12.0.0",
     "@prisma/adapter-pg": "^7.10.1",
     "@prisma/client": "^7.10.1",
+    "argon2": "^0.44.0",
     "dotenv": "^18.0.10",
     "pg": "^8.23.1",
     "reflect-metadata": "^0.2.2",
@@ -33,7 +36,8 @@
     "@nestjs/cli": "^12.0.0",
     "prisma": "^7.10.1",
     "ts-node": "^10.9.2",
-    "tsconfig-paths": "^4.2.0"
+    "tsconfig-paths": "^4.2.0",
+    "tsx": "^4.20.6"
   },
   "jest": {
     "preset": "ts-jest/presets/default-esm",
