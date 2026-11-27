@@ -106,7 +106,21 @@ later in the 24.x line), npm 10+, and Docker Compose v2.
 2. Install dependencies with `npm ci`.
 3. Start local dependencies with `docker compose up -d`.
 4. Run checks with `npm run verify`.
-5. Start an individual NestJS app. In PowerShell:
+5. Prisma commands for the Order Service:
+
+   ```powershell
+   npm run prisma:generate --workspace @flash-deal/order-service
+   npm run prisma:migrate:dev --workspace @flash-deal/order-service
+   npm run prisma:migrate:deploy --workspace @flash-deal/order-service
+   npm run prisma:migrate:status --workspace @flash-deal/order-service
+   ```
+
+   The Prisma schema is `apps/order-service/prisma/schema.prisma`.
+   Generated client code is created automatically before Order Service
+   builds, tests, typechecks, and starts in development. Database
+   migrations are created only after schema models are added.
+
+6. Start an individual NestJS app. In PowerShell:
 
    ```powershell
    $env:PORT = "3000"; npm run start:dev --workspace @flash-deal/api-gateway
