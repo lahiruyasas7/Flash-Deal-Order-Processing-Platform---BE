@@ -8,3 +8,44 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+enum UserRole {
+  ADMIN
+  CUSTOMER
+}
+
+enum RefreshSessionStatus {
+  ACTIVE
+  ROTATED
+  REVOKED
+}
+
+model User {
+  id              String           @id @default(uuid()) @db.Uuid
+  email           String           @unique
+  passwordHash    String
+  role            UserRole         @default(CUSTOMER)
+  createdAt       DateTime         @default(now()) @db.Timestamptz(3)
+  updatedAt       DateTime         @updatedAt @db.Timestamptz(3)
+  refreshSessions RefreshSession[]
+}
+
+model RefreshSession {
+  id                  String               @id @default(uuid()) @db.Uuid
+  userId              String               @db.Uuid
+  refreshTokenHash    String               @unique
+  familyId            String               @default(uuid()) @db.Uuid
+  status              RefreshSessionStatus @default(ACTIVE)
+  expiresAt           DateTime             @db.Timestamptz(3)
+  lastUsedAt          DateTime?            @db.Timestamptz(3)
+  revokedAt           DateTime?            @db.Timestamptz(3)
+  replacedBySessionId String?              @unique @db.Uuid
+  createdAt           DateTime             @default(now()) @db.Timestamptz(3)
+
+  user              User            @relation(fields: [userId], references: [id])
+  replacedBySession RefreshSession? @relation("RefreshSessionRotation", fields: [replacedBySessionId], references: [id], onDelete: SetNull)
+  previousSession   RefreshSession? @relation("RefreshSessionRotation")
+
+  @@index([userId, status, expiresAt])
+  @@index([familyId, status])
+}
