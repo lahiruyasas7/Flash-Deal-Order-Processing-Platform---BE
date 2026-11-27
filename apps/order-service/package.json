@@ -4,19 +4,32 @@
   "type": "module",
   "scripts": {
     "build": "nest build",
+    "prebuild": "npm run prisma:generate",
     "start:dev": "nest start --watch",
+    "prestart:dev": "npm run prisma:generate",
     "test": "node --experimental-vm-modules ../../node_modules/jest/bin/jest.js --runInBand",
-    "typecheck": "tsc --noEmit -p tsconfig.json"
+    "pretest": "npm run prisma:generate",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "pretypecheck": "npm run prisma:generate",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate:dev": "prisma migrate dev",
+    "prisma:migrate:deploy": "prisma migrate deploy",
+    "prisma:migrate:status": "prisma migrate status"
   },
   "dependencies": {
     "@nestjs/common": "^12.0.0",
     "@nestjs/core": "^12.0.0",
     "@nestjs/platform-express": "^12.0.0",
+    "@prisma/adapter-pg": "^7.10.1",
+    "@prisma/client": "^7.10.1",
+    "dotenv": "^18.0.10",
+    "pg": "^8.23.1",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1"
   },
   "devDependencies": {
     "@nestjs/cli": "^12.0.0",
+    "prisma": "^7.10.1",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0"
   },
