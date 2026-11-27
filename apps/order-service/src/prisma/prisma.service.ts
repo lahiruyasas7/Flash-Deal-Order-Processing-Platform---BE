@@ -1,24 +1,19 @@
 import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { PrismaPg } from '@prisma/adapter-pg';
+import { ConfigService } from '@nestjs/config';
 import { PrismaClient } from '../generated/prisma/client.js';
-
-function getDatabaseUrl(): string {
-  const databaseUrl = process.env.ORDER_DATABASE_URL;
-  if (!databaseUrl) {
-    throw new Error('ORDER_DATABASE_URL must be set for the Order Service.');
-  }
-
-  return databaseUrl;
-}
+import type { AppEnvironment } from '../config/environment.validation.js';
 
 @Injectable()
 export class PrismaService
   extends PrismaClient
   implements OnModuleInit, OnModuleDestroy
 {
-  constructor() {
+  constructor(config: ConfigService<AppEnvironment, true>) {
     super({
-      adapter: new PrismaPg({ connectionString: getDatabaseUrl() }),
+      adapter: new PrismaPg({
+        connectionString: config.get('ORDER_DATABASE_URL'),
+      }),
     });
   }
 
